@@ -11,8 +11,13 @@ export interface IHealthProfile extends Document {
   bmi: number;
   diseases: [string];
   disabilities: [string];
+  subdiseases: [string];
+  subdisabilities: [string];
   targetWeight: number;
   toningAreas: [string];
+  age: number;
+  gender: string;
+  isPound: boolean;
 }
 
 // Create schema for nutritional profile
@@ -41,12 +46,32 @@ const healthProfileSchema: Schema<IHealthProfile> = new mongoose.Schema({
     type: [String],
     required: true,
   },
+  subdiseases: {
+    type: [String],
+    required: true,
+  },
+  subdisabilities: {
+    type: [String],
+    required: true,
+  },
   targetWeight: {
     type: Number,
     required: true,
   },
   toningAreas: {
     type: [String],
+    required: true,
+  },
+  age: {
+    type: Number,
+    required: true,
+  },
+  gender: {
+    type: String,
+    required: true,
+  },
+  isPound: {
+    type: Boolean,
     required: true,
   },
 });

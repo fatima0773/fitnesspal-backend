@@ -13,7 +13,7 @@ import {
 import {
   validateResetPassword,
   validateSignIn,
-  userAuthentication,
+  // userAuthentication,
   validateSignUp,
 } from "./middleware";
 import { validateRequest } from "../../common/validationMiddleware";
@@ -26,20 +26,20 @@ userRoutes.post("/send-signup-otp", sendSignupOtp);
 userRoutes.post("/signup", validateSignUp, validateRequest, signup);
 userRoutes.post(
   "/signin",
-  userAuthentication,
+  // userAuthentication,
   validateSignIn,
   validateRequest,
   signin
 );
 userRoutes.post(
   "/reset-password-otp",
-  userAuthentication,
+  // userAuthentication,
   validateRequest,
   sendResetPasswordOtp
 );
 userRoutes.post(
   "/reset-password",
-  userAuthentication,
+  // userAuthentication,
   validateResetPassword,
   validateRequest,
   resetPassword

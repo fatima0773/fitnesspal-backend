@@ -48,8 +48,6 @@ export interface IBloodProfile extends Document {
   hemoglobin: number;
 }
 
-// LIST OF SCHEMA
-
 // Create schema for water intake history
 const waterIntakeHistorySchema: Schema<IWaterIntakeHistory> =
   new mongoose.Schema({

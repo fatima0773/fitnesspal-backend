@@ -6,8 +6,6 @@ export interface IUser extends Document {
   email: string;
   password: string;
   name: string;
-  age: number;
-  gender: string;
 }
 
 // Create schema for products
@@ -21,14 +19,6 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
     required: true,
   },
   name: {
-    type: String,
-    required: true,
-  },
-  age: {
-    type: Number,
-    required: true,
-  },
-  gender: {
     type: String,
     required: true,
   },

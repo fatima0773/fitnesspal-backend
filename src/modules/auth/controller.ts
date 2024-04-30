@@ -7,9 +7,6 @@ import SubscriptionDetailModel from "../../models/subscription";
 import HealthProfileModel from "../../models/healthProfile";
 import NutritionalProfileModel from "../../models/nutritionalProfile";
 
-// JWT Import
-import jwt from "jsonwebtoken";
-
 // Helper Function Imports
 import {
   comparePassword,
@@ -62,18 +59,18 @@ export const sendSignupOtp = async (request: Request, response: Response) => {
         .send("Server configuration issue: Secret key is missing");
     }
 
-    // Generate a JWT token for the user
-    const token = jwt.sign({ email: email }, SECRET_KEY);
+    // // Generate a JWT token for the user
+    // const token = jwt.sign({ email: email }, SECRET_KEY);
 
-    // Prepare response data
-    const result = {
-      token,
-    };
+    // // Prepare response data
+    // const result = {
+    //   token,
+    // };
 
     // Send success response
     return response.status(ResponseCode.SUCCESS).json({
       message: AuthResponseMessage.OTP_SUCCESS,
-      result,
+      // result,
     });
   } catch (error) {
     // Handle errors and send an error response
@@ -90,7 +87,7 @@ export const sendSignupOtp = async (request: Request, response: Response) => {
  * @returns { Response } response
  */
 export const signup = async (request: Request, response: Response) => {
-  const { email, password, name, otp, age, gender } = request.body;
+  const { email, password, name, otp } = request.body;
   try {
     // Retrieve OTP associated with the email using redis
     const emailOTP = await getOtp(email);
@@ -105,8 +102,6 @@ export const signup = async (request: Request, response: Response) => {
         name,
         email,
         password: hashedPassword,
-        age,
-        gender,
         googleAuth: false,
       });
 

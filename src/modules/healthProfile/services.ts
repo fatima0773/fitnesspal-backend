@@ -43,7 +43,7 @@ export const createHealthProfileService = async (
 ) => {
   try {
     const newProfile = await HealthProfileModel.create(request.body);
-    response.status(ResponseCode.CREATED_SUCCESSFULLY).json(newProfile);
+    response.status(ResponseCode.SUCCESS).json(newProfile);
   } catch (error) {
     response
       .status(ResponseCode.INTERNAL_SERVER_ERROR)

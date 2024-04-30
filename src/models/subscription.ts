@@ -29,6 +29,7 @@ const cardDetailSchema: Schema<ICardDetails> = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // active card field
 });
 
 // Create schema for user checkout information
