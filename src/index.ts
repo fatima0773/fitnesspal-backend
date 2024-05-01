@@ -22,6 +22,7 @@ import paymentRoutes from "./modules/payment/routes";
 import nutritionalProfileRoutes from "./modules/nutritionalProfile/routes";
 import subscriptionRoutes from "./modules/subscription/routes";
 import healthProfileRoutes from "./modules/healthProfile/routes";
+import stepHistoryRoutes from "./modules/stepHistory/routes";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -53,6 +54,7 @@ app.use("/nutritional-profile/", nutritionalProfileRoutes);
 app.use("/health-profile/", healthProfileRoutes);
 app.use("/subscription/", subscriptionRoutes);
 app.use("/checkout/", paymentRoutes);
+app.use("/step-tracker/", stepHistoryRoutes);
 
 // Start the server and listen on the specified port
 app.get("/", (req, res) => {
