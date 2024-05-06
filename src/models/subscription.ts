@@ -12,7 +12,8 @@ export interface ISubscriptionDetails extends Document {
 export interface ICardDetails extends Document {
   cardNumber: string;
   cvv: string;
-  expirationDate: string;
+  expirationDate: Date;
+  isActive: boolean;
 }
 
 // Create schema for user checkout information
@@ -26,10 +27,13 @@ const cardDetailSchema: Schema<ICardDetails> = new mongoose.Schema({
     required: true,
   },
   expirationDate: {
-    type: String,
+    type: Date,
     required: true,
   },
-  // active card field
+  isActive: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 // Create schema for user checkout information

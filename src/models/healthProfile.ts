@@ -1,8 +1,6 @@
 // Mongoose Imports
 import mongoose, { Document, Model, Schema } from "mongoose";
 
-// LIST OF INTERFACE
-
 // Create interfact for health profile
 export interface IHealthProfile extends Document {
   userId: string;
@@ -15,8 +13,6 @@ export interface IHealthProfile extends Document {
   subdisabilities: [string];
   targetWeight: number;
   toningAreas: [string];
-  age: number;
-  gender: string;
   isPound: boolean;
 }
 
@@ -60,14 +56,6 @@ const healthProfileSchema: Schema<IHealthProfile> = new mongoose.Schema({
   },
   toningAreas: {
     type: [String],
-    required: true,
-  },
-  age: {
-    type: Number,
-    required: true,
-  },
-  gender: {
-    type: String,
     required: true,
   },
   isPound: {

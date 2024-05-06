@@ -87,7 +87,8 @@ export const sendSignupOtp = async (request: Request, response: Response) => {
  * @returns { Response } response
  */
 export const signup = async (request: Request, response: Response) => {
-  const { email, password, name, otp } = request.body;
+  const { email, password, name, otp, age, gender, emergencyContacts } =
+    request.body;
   try {
     // Retrieve OTP associated with the email using redis
     const emailOTP = await getOtp(email);
@@ -103,6 +104,9 @@ export const signup = async (request: Request, response: Response) => {
         email,
         password: hashedPassword,
         googleAuth: false,
+        age,
+        gender,
+        emergencyContacts,
       });
 
       // Send success response

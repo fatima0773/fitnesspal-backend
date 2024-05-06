@@ -76,11 +76,12 @@ export const getCardService = async (request: Request, response: Response) => {
  * @returns { Response } response
  */
 export const addCardService = async (request: Request, response: Response) => {
-  const { cardNumber, cvv, expirationDate, userId } = request.body;
+  const { cardNumber, cvv, expirationDate, userId, isActive } = request.body;
   const newCard: ICardDetails = {
     cardNumber,
     cvv,
     expirationDate,
+    isActive,
   } as ICardDetails;
 
   try {

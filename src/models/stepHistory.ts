@@ -5,7 +5,7 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 
 // Create interface for step tracker
 export interface IStepHistory extends Document {
-  userId: mongoose.Schema.Types.ObjectId;
+  userId: string;
   stepGoal: number;
   currentSteps: number;
   date: Date;
@@ -14,7 +14,7 @@ export interface IStepHistory extends Document {
 // Create schema for step tracker
 const stepHistorySchema: Schema<IStepHistory> = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: "User",
   },
@@ -30,7 +30,7 @@ const stepHistorySchema: Schema<IStepHistory> = new mongoose.Schema({
     type: Date,
     required: true,
   },
-}, { timestamps: true });
+});
 
 const stepHistory: Model<IStepHistory> = mongoose.model<IStepHistory>(
   "stepHistory",

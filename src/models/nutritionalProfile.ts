@@ -14,14 +14,14 @@ export interface INutritionalProfile extends Document {
 
 // Create interface for calorie history
 export interface ICalorieHistory extends Document {
-  date: string;
+  date: Date;
   caloriesConsumed: number;
   caloriesBurned: number;
 }
 
 // Create interface for nutrient history
 export interface INutrientHistory extends Document {
-  date: string;
+  date: Date;
   cholesterol: number;
   protein: number;
   carbs: number;
@@ -31,7 +31,7 @@ export interface INutrientHistory extends Document {
 
 // Create interface for water intake history
 export interface IWaterIntakeHistory extends Document {
-  date: string;
+  date: Date;
   waterIntake: number;
 }
 
@@ -52,7 +52,7 @@ export interface IBloodProfile extends Document {
 const waterIntakeHistorySchema: Schema<IWaterIntakeHistory> =
   new mongoose.Schema({
     date: {
-      type: String,
+      type: Date,
       required: true,
     },
     waterIntake: {
@@ -64,7 +64,7 @@ const waterIntakeHistorySchema: Schema<IWaterIntakeHistory> =
 // Create schema for water intake history
 const calorieHistorySchema: Schema<ICalorieHistory> = new mongoose.Schema({
   date: {
-    type: String,
+    type: Date,
     required: true,
   },
   caloriesConsumed: {
@@ -120,7 +120,7 @@ const bloodProfileSchema: Schema<IBloodProfile> = new mongoose.Schema({
 // Create schema for nutrient history
 const nutrientHistorySchema: Schema<INutrientHistory> = new mongoose.Schema({
   date: {
-    type: String,
+    type: Date,
     required: true,
   },
   cholesterol: {

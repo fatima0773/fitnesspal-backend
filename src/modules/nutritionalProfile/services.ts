@@ -129,7 +129,7 @@ export const updateCalorieHistoryService = async (
     }
 
     // Get today's date in the format 'YYYY-MM-DD'
-    const todayDate = new Date().toISOString().split("T")[0];
+    const todayDate = new Date();
 
     // Check if a calorie history entry already exists for today
     const todayCalorieEntry = profile.calorieHistory.find(
@@ -183,7 +183,7 @@ export const updateWaterIntakeHistoryService = async (
     }
 
     // Get today's date in the format 'YYYY-MM-DD'
-    const todayDate = new Date().toISOString().split("T")[0];
+    const todayDate = new Date();
 
     // Check if a water intake history entry already exists for today
     const todayWaterIntakeEntry = profile.waterIntakeHistory.find(

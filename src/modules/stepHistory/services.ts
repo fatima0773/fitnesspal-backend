@@ -122,7 +122,9 @@ export const createStepHistoryService = async (
     if (!userId || !stepGoal || !currentSteps || !date) {
       return response
         .status(ResponseCode.BAD_REQUEST)
-        .json({ error: "User Id, Step Goal, Current Steps and Date are required!" });
+        .json({
+          error: "User Id, Step Goal, Current Steps and Date are required!",
+        });
     }
 
     // create new Step History
@@ -177,7 +179,6 @@ export const updateStepsService = async (
         .status(ResponseCode.NOT_FOUND)
         .json({ error: "Step History not found!" });
     }
-    console.log(existingRecord);
 
     // Check if current steps is between 0 and step goal
     if (currentSteps > existingRecord?.stepGoal || currentSteps < 0) {
