@@ -198,6 +198,7 @@ export const signin = async (request: Request, response: Response) => {
       message: AuthResponseMessage.SIGNIN_SUCCESS,
       // eslint-disable-next-line no-underscore-dangle
       userId: existingUser._id,
+      name: existingUser.name,
     });
   } catch (error) {
     // Handle errors and send an error response
