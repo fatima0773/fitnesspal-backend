@@ -348,4 +348,85 @@ export const deleteAccount = async (request: Request, response: Response) => {
   }
 };
 
+/**
+ * Update user's age or gender
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const updateUserProfile = async (
+  request: Request,
+  response: Response
+) => {
+  const { age, gender, userId } = request.body;
+
+  try {
+    // Find the user by ID
+    const user = await UserModel.findById(userId);
+
+    // If user not found, return a not found response
+    if (!user) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: AuthResponseMessage.USER_NOT_FOUND,
+      });
+    }
+
+    // Update user's age if provided
+    if (age !== undefined) {
+      user.age = age;
+    }
+
+    // Update user's gender if provided
+    if (gender !== undefined) {
+      user.gender = gender;
+    }
+
+    // Save the updated user
+    await user.save();
+
+    // Send success response
+    return response.status(ResponseCode.SUCCESS).json({
+      message: AuthResponseMessage.PROFILE_UPDATE_SUCCESS,
+    });
+  } catch (error) {
+    // Handle errors and send an error response
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: AuthResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get user by user ID
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getUserById = async (request: Request, response: Response) => {
+  const userId = request.params.userId;
+
+  try {
+    // Find the user by ID
+    const user = await UserModel.findById(userId);
+
+    // If user not found, return a not found response
+    if (!user) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: AuthResponseMessage.USER_NOT_FOUND,
+      });
+    }
+
+    // Send success response with the user data
+    return response.status(ResponseCode.SUCCESS).json({
+      user: user,
+    });
+  } catch (error) {
+    console.log(error);
+    // Handle errors and send an error response
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: AuthResponseMessage.ERROR,
+    });
+  }
+};
+
 // END OF FILE

@@ -33,6 +33,8 @@ export enum AuthResponseMessage {
   NO_SECRET_KEY = "Server Error: No secret key found",
   INVALID_TOKEN = "Invalid token",
   OTP_MISMATCH = "The otp you entered is incorrect, please try again",
+  PROFILE_UPDATE_SUCCESS = "Profile update successfully",
+  PROFILE_UPDATE_ERROR = "Error updating profile",
 }
 
 // Enum for Nutritional and HealthProfile Response Messages

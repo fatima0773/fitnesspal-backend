@@ -4,17 +4,18 @@ import express from "express";
 // Controller Imports
 import {
   deleteAccount,
+  getUserById,
   resetPassword,
   sendResetPasswordOtp,
   sendSignupOtp,
   signin,
   signup,
+  updateUserProfile,
   verifyOtp,
 } from "./controller";
 import {
   validateResetPassword,
   validateSignIn,
-  // userAuthentication,
   validateSignUp,
 } from "./middleware";
 import { validateRequest } from "../../common/validationMiddleware";
@@ -26,26 +27,16 @@ const userRoutes = express.Router();
 userRoutes.post("/verify-otp", verifyOtp);
 userRoutes.post("/send-signup-otp", sendSignupOtp);
 userRoutes.post("/signup", validateSignUp, validateRequest, signup);
-userRoutes.post(
-  "/signin",
-  // userAuthentication,
-  validateSignIn,
-  validateRequest,
-  signin
-);
-userRoutes.post(
-  "/reset-password-otp",
-  // userAuthentication,
-  validateRequest,
-  sendResetPasswordOtp
-);
+userRoutes.post("/signin", validateSignIn, validateRequest, signin);
+userRoutes.post("/reset-password-otp", validateRequest, sendResetPasswordOtp);
 userRoutes.post(
   "/reset-password",
-  // userAuthentication,
   validateResetPassword,
   validateRequest,
   resetPassword
 );
+userRoutes.put("/update-profile", updateUserProfile);
+userRoutes.get("/:userId", getUserById);
 userRoutes.delete("/delete-account/:userId", deleteAccount);
 
 export default userRoutes;
