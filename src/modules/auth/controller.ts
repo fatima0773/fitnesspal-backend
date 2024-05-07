@@ -130,6 +130,39 @@ export const signup = async (request: Request, response: Response) => {
 };
 
 /**
+ * Registers a user
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const verifyOtp = async (request: Request, response: Response) => {
+  const { otp, email } = request.body;
+  try {
+    // Retrieve OTP associated with the email using redis
+    const emailOTP = await getOtp(email);
+
+    // Compare the provided OTP with the retrieved OTP
+    if (emailOTP == otp) {
+      return response.status(ResponseCode.SUCCESS).json({
+        message: AuthResponseMessage.OTP_VERIFICATION_SUCCESS,
+      });
+
+      // Send success response
+    } else {
+      // If OTP does not match, send unauthorized response
+      return response.status(ResponseCode.UNAUTHORIZED).json({
+        message: AuthResponseMessage.OTP_MISMATCH,
+      });
+    }
+  } catch (error) {
+    // Handle errors and send an error response
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: AuthResponseMessage.OTP_VERIFICATION_ERROR,
+    });
+  }
+};
+
+/**
  * Signs in a user
  * @param { Request } request
  * @param { Response }response

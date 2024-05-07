@@ -9,6 +9,7 @@ import {
   sendSignupOtp,
   signin,
   signup,
+  verifyOtp,
 } from "./controller";
 import {
   validateResetPassword,
@@ -22,6 +23,7 @@ import { validateRequest } from "../../common/validationMiddleware";
 const userRoutes = express.Router();
 
 // User Routes
+userRoutes.post("/verify-otp", verifyOtp);
 userRoutes.post("/send-signup-otp", sendSignupOtp);
 userRoutes.post("/signup", validateSignUp, validateRequest, signup);
 userRoutes.post(
