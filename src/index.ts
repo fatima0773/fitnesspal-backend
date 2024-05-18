@@ -39,7 +39,7 @@ const app: Express = express();
 const port = PORT || 3000;
 
 const corsOptions = {
-  origin: `https://localhost:${port}`,
+  origin: `http://localhost:3000`,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
@@ -58,11 +58,11 @@ app.use("/step-tracker/", stepHistoryRoutes);
 
 // Start the server and listen on the specified port
 app.get("/", (req, res) => {
-  res.send(`Server running at https://localhost:${port}`);
+  res.send(`Server running at http://localhost:${port}`);
 });
 
 app.listen(port, () => {
-  logger.info(`Server running at https://localhost:${port}`);
+  logger.info(`Server running at http://localhost:${port}`);
 });
 
 // END OF FILE

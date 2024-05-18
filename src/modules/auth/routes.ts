@@ -10,6 +10,7 @@ import {
   sendSignupOtp,
   signin,
   signup,
+  updateUserPassword,
   updateUserProfile,
   verifyOtp,
 } from "./controller";
@@ -36,6 +37,7 @@ userRoutes.post(
   resetPassword
 );
 userRoutes.put("/update-profile", updateUserProfile);
+userRoutes.put("/update-password", updateUserPassword);
 userRoutes.get("/:userId", getUserById);
 userRoutes.delete("/delete-account/:userId", deleteAccount);
 

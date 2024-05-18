@@ -359,7 +359,7 @@ export const updateUserProfile = async (
   request: Request,
   response: Response
 ) => {
-  const { age, gender, userId } = request.body;
+  const { age, gender, userId, name } = request.body;
 
   try {
     // Find the user by ID
@@ -381,6 +381,66 @@ export const updateUserProfile = async (
     if (gender !== undefined) {
       user.gender = gender;
     }
+
+    // Update user's name if provided
+    if (name !== undefined) {
+      user.name = name;
+    }
+
+    // Save the updated user
+    await user.save();
+
+    // Send success response
+    return response.status(ResponseCode.SUCCESS).json({
+      message: AuthResponseMessage.PROFILE_UPDATE_SUCCESS,
+    });
+  } catch (error) {
+    // Handle errors and send an error response
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: AuthResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Update user's password
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const updateUserPassword = async (
+  request: Request,
+  response: Response
+) => {
+  const { userId, oldPassword, newPassword  } = request.body;
+
+  try {
+    // Find the user by ID
+    const user = await UserModel.findById(userId);
+
+    // If user not found, return a not found response
+    if (!user) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: AuthResponseMessage.USER_NOT_FOUND,
+      });
+    }
+
+    // Compare provided password with the user's stored password
+    const isPasswordCorrect = await comparePassword(
+      oldPassword,
+      user.password
+    );
+
+    if (!isPasswordCorrect) {
+      // If password is incorrect, send a bad request response
+      return response.status(ResponseCode.BAD_REQUEST).json({
+        message: AuthResponseMessage.INVALID_PASSWORD,
+      });
+    }
+
+    // Hash the new password
+    const hashedPassword = await getHashedPassword(newPassword);
+    user.password = hashedPassword;
 
     // Save the updated user
     await user.save();
