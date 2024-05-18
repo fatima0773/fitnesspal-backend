@@ -7,6 +7,7 @@ import {
   getNutritionalProfile,
   updateBloodProfile,
   updateCalorieHistory,
+  updateNutrientHistory,
 } from "./controller";
 
 // eslint-disable-next-line new-cap
@@ -24,6 +25,7 @@ nutritionalProfileRoutes.put(
   updateCalorieHistory
 );
 nutritionalProfileRoutes.put("/update-blood-profile", updateBloodProfile);
+nutritionalProfileRoutes.put("/update-nutrient-history", updateNutrientHistory);
 
 export default nutritionalProfileRoutes;
 
