@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 // Model Imports
 import NutritionalProfileModel, {
   ICalorieHistory,
+  INutrientHistory,
   IWaterIntakeHistory,
 } from "../../models/nutritionalProfile";
 import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
@@ -105,19 +106,17 @@ export const createNutritionalProfileService = async (
   }
 };
 
-/**
- * Update User Calorie History
- * @param { Request } request
- * @param { Response }response
- * @returns { Response } response
- */
 export const updateCalorieHistoryService = async (
   request: Request,
   response: Response
 ) => {
   try {
     const userId: string = request.body.userId; // Assuming userId is sent in the request body
-    const { consumedCalories, burnedCalories } = request.body;
+    let { consumedCalories, burnedCalories } = request.body;
+
+    // Convert consumedCalories and burnedCalories to numbers
+    consumedCalories = parseFloat(consumedCalories);
+    burnedCalories = parseFloat(burnedCalories);
 
     // Find the user's nutritional profile
     const profile = await NutritionalProfileModel.findOne({ userId: userId });
@@ -128,25 +127,28 @@ export const updateCalorieHistoryService = async (
         .json({ message: "Nutritional profile not found for this user." });
     }
 
-    // Get today's date in the format 'YYYY-MM-DD'
+    // Get today's date
     const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0 for comparison
 
     // Check if a calorie history entry already exists for today
-    const todayCalorieEntry = profile.calorieHistory.find(
-      (entry) => entry.date === todayDate
+    const todayCalorieEntryIndex = profile.calorieHistory.findIndex(
+      (entry) => entry.date.getTime() === todayDate.getTime()
     );
 
-    if (todayCalorieEntry) {
+    if (todayCalorieEntryIndex !== -1) {
       // If entry exists, update consumed and burned calories
-      todayCalorieEntry.caloriesConsumed += consumedCalories || 0;
-      todayCalorieEntry.caloriesBurned += burnedCalories || 0;
+      profile.calorieHistory[todayCalorieEntryIndex].caloriesConsumed +=
+        consumedCalories || 0;
+      profile.calorieHistory[todayCalorieEntryIndex].caloriesBurned +=
+        burnedCalories || 0;
     } else {
       // If entry doesn't exist, create a new entry
       const newCalorieEntry: ICalorieHistory = {
         date: todayDate,
         caloriesConsumed: consumedCalories || 0,
         caloriesBurned: burnedCalories || 0,
-      } as ICalorieHistory;
+      } as unknown as ICalorieHistory;
 
       profile.calorieHistory.push(newCalorieEntry);
     }
@@ -170,8 +172,14 @@ export const updateWaterIntakeHistoryService = async (
   response: Response
 ) => {
   try {
-    const userId: string = request.body.userId; // Assuming userId is sent in the request body
-    const { waterIntake } = request.body;
+    const { userId, date, waterIntake } = request.body;
+
+    // Validate the date
+    const intakeDate = new Date(date);
+    if (isNaN(intakeDate.getTime())) {
+      return response.status(400).json({ message: "Invalid date format." });
+    }
+    intakeDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
 
     // Find the user's nutritional profile
     const profile = await NutritionalProfileModel.findOne({ userId: userId });
@@ -182,25 +190,23 @@ export const updateWaterIntakeHistoryService = async (
         .json({ message: "Nutritional profile not found for this user." });
     }
 
-    // Get today's date in the format 'YYYY-MM-DD'
-    const todayDate = new Date();
-
-    // Check if a water intake history entry already exists for today
-    const todayWaterIntakeEntry = profile.waterIntakeHistory.find(
-      (entry) => entry.date === todayDate
+    // Check if a water intake history entry already exists for the specified date
+    const intakeEntryIndex = profile.waterIntakeHistory.findIndex(
+      (entry) => entry.date.getTime() === intakeDate.getTime()
     );
 
-    if (todayWaterIntakeEntry) {
-      // If entry exists, update water intake
-      todayWaterIntakeEntry.waterIntake += waterIntake || 0;
+    if (intakeEntryIndex !== -1) {
+      // If entry exists, update water intake value
+      const intakeEntry = profile.waterIntakeHistory[intakeEntryIndex];
+      intakeEntry.waterIntake = waterIntake || intakeEntry.waterIntake;
     } else {
       // If entry doesn't exist, create a new entry
-      const newWaterIntakeEntry: IWaterIntakeHistory = {
-        date: todayDate,
+      const newIntakeEntry: IWaterIntakeHistory = {
+        date: intakeDate,
         waterIntake: waterIntake || 0,
-      } as IWaterIntakeHistory;
+      } as unknown as IWaterIntakeHistory;
 
-      profile.waterIntakeHistory.push(newWaterIntakeEntry);
+      profile.waterIntakeHistory.push(newIntakeEntry);
     }
 
     // Save the updated profile
@@ -270,6 +276,63 @@ export const updateBloodProfileService = async (
     const updatedProfile = await profile.save();
     response.status(200).json(updatedProfile);
   } catch (error) {
+    response.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateNutrientHistoryService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const { userId, date, cholesterol, protein, carbs, sodium, fats } =
+      request.body;
+
+    // Validate the date
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    // Find the user's nutritional profile
+    const profile = await NutritionalProfileModel.findOne({ userId: userId });
+
+    if (!profile) {
+      return response
+        .status(404)
+        .json({ message: "Nutritional profile not found for this user." });
+    }
+
+    // Check if a nutrient history entry already exists for the specified date
+    const nutrientEntryIndex = profile.nutrientHistory.findIndex(
+      (entry) => entry.date.getTime() === todayDate.getTime()
+    );
+
+    if (nutrientEntryIndex !== -1) {
+      // If entry exists, update nutrient values
+      const nutrientEntry = profile.nutrientHistory[nutrientEntryIndex];
+      nutrientEntry.cholesterol += cholesterol || nutrientEntry.cholesterol;
+      nutrientEntry.protein += protein || nutrientEntry.protein;
+      nutrientEntry.carbs += carbs || nutrientEntry.carbs;
+      nutrientEntry.sodium += sodium || nutrientEntry.sodium;
+      nutrientEntry.fats = fats || nutrientEntry.fats;
+    } else {
+      // If entry doesn't exist, create a new entry
+      const newNutrientEntry: INutrientHistory = {
+        date: todayDate,
+        cholesterol: cholesterol || 0,
+        protein: protein || 0,
+        carbs: carbs || 0,
+        sodium: sodium || 0,
+        fats: fats || 0,
+      } as unknown as INutrientHistory;
+
+      profile.nutrientHistory.push(newNutrientEntry);
+    }
+
+    // Save the updated profile
+    const updatedProfile = await profile.save();
+    response.status(200).json(updatedProfile);
+  } catch (error) {
+    console.log(error);
     response.status(500).json({ message: "Internal Server Error" });
   }
 };

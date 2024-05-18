@@ -10,6 +10,7 @@ import {
   getNutritionalProfileService,
   updateBloodProfileService,
   updateCalorieHistoryService,
+  updateNutrientHistoryService,
   updateWaterIntakeHistoryService,
 } from "./services";
 
@@ -101,6 +102,25 @@ export const updateBloodProfile = async (
 ) => {
   try {
     return await updateBloodProfileService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Update Nutrient Intake History
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const updateNutrientHistory = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await updateNutrientHistoryService(request, response);
   } catch (error) {
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: ProfileResponseMessage.ERROR,

@@ -23,6 +23,7 @@ import nutritionalProfileRoutes from "./modules/nutritionalProfile/routes";
 import subscriptionRoutes from "./modules/subscription/routes";
 import healthProfileRoutes from "./modules/healthProfile/routes";
 import stepHistoryRoutes from "./modules/stepHistory/routes";
+import mealPlanRoutes from "./modules/mealPlan/routes";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -55,7 +56,7 @@ app.use("/health-profile/", healthProfileRoutes);
 app.use("/subscription/", subscriptionRoutes);
 app.use("/checkout/", paymentRoutes);
 app.use("/step-tracker/", stepHistoryRoutes);
-
+app.use("/meal-plan/", mealPlanRoutes);
 // Start the server and listen on the specified port
 app.get("/", (req, res) => {
   res.send(`Server running at https://localhost:${port}`);
