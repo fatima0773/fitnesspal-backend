@@ -49,7 +49,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Use the dedicated routes middleware
+// // Use the dedicated routes middleware
 app.use("/user/", userRoutes);
 app.use("/nutritional-profile/", nutritionalProfileRoutes);
 app.use("/health-profile/", healthProfileRoutes);
