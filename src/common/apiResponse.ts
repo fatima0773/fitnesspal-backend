@@ -44,6 +44,8 @@ export enum ProfileResponseMessage {
   PROFILE_FOUND = "Profile found successfully",
   PROFILE_CREATED_SUCCESSFUL = "Profile created successfully",
   PROFILE_CREATED_UNSUCCESSFUL = "Error creating profile, please try again",
+  NO_DATA = "No data available for today.",
+  DATA_FOUND = "Data found.",
 }
 
 // END OF FILE

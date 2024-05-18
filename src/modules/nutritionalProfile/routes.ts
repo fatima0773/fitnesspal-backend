@@ -4,7 +4,9 @@ import express from "express";
 // Controller Imports
 import {
   createNutritionalProfile,
+  getDailyCalorieConsumed,
   getNutritionalProfile,
+  getWeeklyCalorieConsumed,
   updateBloodProfile,
   updateCalorieHistory,
   updateNutrientHistory,
@@ -26,6 +28,14 @@ nutritionalProfileRoutes.put(
 );
 nutritionalProfileRoutes.put("/update-blood-profile", updateBloodProfile);
 nutritionalProfileRoutes.put("/update-nutrient-history", updateNutrientHistory);
+nutritionalProfileRoutes.get(
+  "/get-weekly-calories-consumed/:userId",
+  getWeeklyCalorieConsumed
+);
+nutritionalProfileRoutes.get(
+  "/get-daily-calories-consumed/:userId",
+  getDailyCalorieConsumed
+);
 
 export default nutritionalProfileRoutes;
 

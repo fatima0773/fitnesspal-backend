@@ -412,7 +412,7 @@ export const updateUserPassword = async (
   request: Request,
   response: Response
 ) => {
-  const { userId, oldPassword, newPassword  } = request.body;
+  const { userId, oldPassword, newPassword } = request.body;
 
   try {
     // Find the user by ID
@@ -426,10 +426,7 @@ export const updateUserPassword = async (
     }
 
     // Compare provided password with the user's stored password
-    const isPasswordCorrect = await comparePassword(
-      oldPassword,
-      user.password
-    );
+    const isPasswordCorrect = await comparePassword(oldPassword, user.password);
 
     if (!isPasswordCorrect) {
       // If password is incorrect, send a bad request response
@@ -482,7 +479,6 @@ export const getUserById = async (request: Request, response: Response) => {
       user: user,
     });
   } catch (error) {
-    console.log(error);
     // Handle errors and send an error response
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: AuthResponseMessage.ERROR,

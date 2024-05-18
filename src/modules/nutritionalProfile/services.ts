@@ -285,8 +285,7 @@ export const updateNutrientHistoryService = async (
   response: Response
 ) => {
   try {
-    const { userId, date, cholesterol, protein, carbs, sodium, fats } =
-      request.body;
+    const { userId, cholesterol, protein, carbs, sodium, fats } = request.body;
 
     // Validate the date
     const todayDate = new Date();
@@ -332,7 +331,104 @@ export const updateNutrientHistoryService = async (
     const updatedProfile = await profile.save();
     response.status(200).json(updatedProfile);
   } catch (error) {
-    console.log(error);
     response.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+/**
+ * Get Calorie Consumed of Today
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getDailyCalorieConsumedService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    // Find today's calorie entry
+    const todayCalorieEntry = profile.calorieHistory.find(
+      (entry) => entry.date.getTime() === todayDate.getTime()
+    );
+
+    if (!todayCalorieEntry) {
+      return response.status(ResponseCode.SUCCESS).json({
+        message: ProfileResponseMessage.NO_DATA,
+        data: { caloriesConsumed: 0 },
+      });
+    }
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: { caloriesConsumed: todayCalorieEntry.caloriesConsumed },
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get Calorie Consumed of Last Week (Last 7 Days)
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getWeeklyCalorieConsumedService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date and the date 7 days ago
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
+
+    // Filter the calorie history for the last 7 days
+    const lastWeekCalorieEntries = profile.calorieHistory.filter(
+      (entry) => entry.date >= lastWeek && entry.date <= today
+    );
+
+    const totalCaloriesConsumed = lastWeekCalorieEntries.reduce(
+      (total, entry) => total + entry.caloriesConsumed,
+      0
+    );
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: { totalCaloriesConsumed },
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
   }
 };

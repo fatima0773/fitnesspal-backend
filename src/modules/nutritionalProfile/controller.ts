@@ -7,7 +7,9 @@ import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
 // Services Imports
 import {
   createNutritionalProfileService,
+  getDailyCalorieConsumedService,
   getNutritionalProfileService,
+  getWeeklyCalorieConsumedService,
   updateBloodProfileService,
   updateCalorieHistoryService,
   updateNutrientHistoryService,
@@ -121,6 +123,44 @@ export const updateNutrientHistory = async (
 ) => {
   try {
     return await updateNutrientHistoryService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get daily calorie consumed
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getDailyCalorieConsumed = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await getDailyCalorieConsumedService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get weekly calorie consumed
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getWeeklyCalorieConsumed = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await getWeeklyCalorieConsumedService(request, response);
   } catch (error) {
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: ProfileResponseMessage.ERROR,
