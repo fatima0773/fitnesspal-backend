@@ -2,8 +2,8 @@
 import { Request, Response } from "express";
 
 // Model Imports
-import StepHistoryModel from "../../models/stepHistory";
-import { ResponseCode } from "../../common/apiResponse";
+import StepHistoryModel, { IUserStepHistory } from "../../models/stepHistory";
+import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
 
 /**
  * Get All User's Step Histories by User Id
@@ -116,23 +116,31 @@ export const createStepHistoryService = async (
   response: Response
 ) => {
   try {
-    const { userId, stepGoal, currentSteps, date } = request.body;
+    const { userId, stepGoal, currentSteps } = request.body;
 
     // Check if required fields are provided
-    if (!userId || !stepGoal || !currentSteps || !date) {
+    if (!userId || !stepGoal || !currentSteps) {
       return response
         .status(ResponseCode.BAD_REQUEST)
         .json({
-          error: "User Id, Step Goal, Current Steps and Date are required!",
+          error: "User Id, Step Goal and Current Steps are required!",
         });
+    }
+
+    // Check if a profile already exists for the given userId
+    const existingProfile = await StepHistoryModel.findOne({
+      userId: userId,
+    });
+    if (existingProfile) {
+      return response
+        .status(400)
+        .json({ message: "Step history already exists for this user." });
     }
 
     // create new Step History
     const newStepHistory = await StepHistoryModel.create({
-      userId,
-      stepGoal,
-      currentSteps,
-      date: Date.parse(date),
+      userId: userId,
+      stepHistory: []
     });
 
     if (!newStepHistory) {
@@ -141,7 +149,10 @@ export const createStepHistoryService = async (
         .json({ error: "Step History not created!" });
     }
 
-    response.status(ResponseCode.SUCCESS).json(newStepHistory);
+    response.status(ResponseCode.CREATED_SUCCESSFULLY).json({
+      message: ProfileResponseMessage.PROFILE_CREATED_SUCCESSFUL,
+      data: newStepHistory,
+    });
   } catch (error) {
     response
       .status(ResponseCode.INTERNAL_SERVER_ERROR)
@@ -160,45 +171,63 @@ export const updateStepsService = async (
   response: Response
 ) => {
   try {
-    const { userId, date, currentSteps } = request.body;
+    const userId = request.body.userId;
+    let { currentSteps, stepGoal } = request.body;
 
     // Check if required fields are provided
-    if (!userId || !date || !currentSteps) {
+    if (!userId || !currentSteps || !stepGoal) {
       return response
         .status(ResponseCode.BAD_REQUEST)
-        .json({ error: "User Id, Date and Current Steps are required!" });
+        .json({ error: "User Id, Step Goal and Current Steps are required!" });
     }
 
-    // Find Existing Step History By User Id and Date
+    // Parse current steps and step goal to integer
+    currentSteps = parseInt(currentSteps);
+    stepGoal = parseInt(stepGoal);
+
+    // Find Existing Step History By User Id
     const existingRecord = await StepHistoryModel.findOne({
       userId: userId,
-      date: Date.parse(date),
-    }).select({ stepGoal: 1 });
+    });
     if (!existingRecord) {
       return response
         .status(ResponseCode.NOT_FOUND)
         .json({ error: "Step History not found!" });
     }
 
-    // Check if current steps is between 0 and step goal
-    if (currentSteps > existingRecord?.stepGoal || currentSteps < 0) {
-      return response
-        .status(ResponseCode.BAD_REQUEST)
-        .json({ error: "Current Steps should be between 0 and Step Goal!" });
+    // Get today's date
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0 for comparison
+
+    const todayStepHistoryIndex = existingRecord.stepHistory.findIndex((entry) => {
+      return entry.date.getTime() === todayDate.getTime();
+    });
+
+    // Update current steps for today
+    if (todayStepHistoryIndex !== -1) {
+      existingRecord.stepHistory[todayStepHistoryIndex].currentSteps += currentSteps || 0;
+
+      if (existingRecord.stepHistory[todayStepHistoryIndex].stepGoal !== 0) {
+        // Check if current steps is between 0 and step goal
+        if (currentSteps > existingRecord.stepHistory[todayStepHistoryIndex].stepGoal || currentSteps < 0) {
+          return response
+            .status(ResponseCode.BAD_REQUEST)
+            .json({ error: "Current Steps should be between 0 and Step Goal!" });
+        }
+      }
+    } else {
+      // Create new entry for today
+      const newEntry = {
+        stepGoal: stepGoal || 0,
+        currentSteps: currentSteps || 0,
+        date: todayDate,
+      } as unknown as IUserStepHistory;
+
+      existingRecord.stepHistory.push(newEntry);
     }
 
     // Update User Steps
-    const updatedStepHistory = await StepHistoryModel.findByIdAndUpdate(
-      existingRecord?.id,
-      { $set: { currentSteps } },
-      { new: true }
-    );
-
-    if (!updatedStepHistory) {
-      return response
-        .status(ResponseCode.NOT_FOUND)
-        .json({ error: "Step History not found!" });
-    }
+    const updatedStepHistory = await existingRecord.save();
 
     response.status(ResponseCode.SUCCESS).json(updatedStepHistory);
   } catch (error) {
