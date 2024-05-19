@@ -79,15 +79,23 @@ export const getStepHistoryService = async (
     if (startdate && enddate) {
       stepHistory = await StepHistoryModel.find({
         userId: userId,
-        date: {
-          $gte: Date.parse(startdate),
-          $lte: Date.parse(enddate),
+        stepHistory:{
+          $elemMatch: {
+            date: {
+              $gte: Date.parse(startdate),
+              $lte: Date.parse(enddate),
+            },
+          },
         },
       });
     } else if (date) {
       stepHistory = await StepHistoryModel.findOne({
         userId: userId,
-        date: Date.parse(date),
+        stepHistory:{
+          $elemMatch: {
+            date: Date.parse(date),
+          },
+        },
       });
     }
 

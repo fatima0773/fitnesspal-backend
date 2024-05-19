@@ -5,8 +5,8 @@ import { paymentIntent } from './controller';
 // eslint-disable-next-line new-cap
 const paymentRoutes = express.Router();
 
-paymentRoutes.post('/process-payment', paymentIntent);
-
+// paymentRoutes.post('/process-payment', paymentIntent);
+paymentRoutes.post('/stripe', paymentIntent);
 export default paymentRoutes;
 
 // END OF FILE
