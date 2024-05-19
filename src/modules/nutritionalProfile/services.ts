@@ -8,6 +8,7 @@ import NutritionalProfileModel, {
   IWaterIntakeHistory,
 } from "../../models/nutritionalProfile";
 import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
+import nutritionalProfile from "../../models/nutritionalProfile";
 // import UserModel from "../../models/user";
 
 /**
@@ -57,13 +58,6 @@ export const createNutritionalProfileService = async (
 ) => {
   try {
     const userId: string = request.body.userId; // Assuming userId is sent in the request body
-
-    // Check if the user with the provided userId exists
-    // const existingUser = await UserModel.findOne({ userId });
-
-    // if (!existingUser) {
-    //   return response.status(404).json({ message: "User not found." });
-    // }
 
     // Check if a profile already exists for the given userId
     const existingProfile = await NutritionalProfileModel.findOne({
@@ -519,6 +513,153 @@ export const getDailyWaterIntakeService = async (
   } catch (error) {
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+// Service function to get today's nutrient history
+export const getDailyNutrientHistoryService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    // Find today's nutrient entry
+    const todayNutrientEntry = profile.nutrientHistory.find(
+      (entry) => entry.date.getTime() === todayDate.getTime()
+    );
+
+    if (!todayNutrientEntry) {
+      return response.status(ResponseCode.SUCCESS).json({
+        message: ProfileResponseMessage.NO_DATA,
+        data: { cholesterol: 0, protein: 0, carbs: 0, sodium: 0, fats: 0 },
+      });
+    }
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: todayNutrientEntry,
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+export const getNutritionalProfilesForDatesService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const { userId, startDate, endDate } = request.params;
+
+    // Parse the start and end dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Find the user's nutritional profile
+    const profile = await nutritionalProfile.findOne({ userId });
+
+    if (!profile) {
+      return response
+        .status(ResponseCode.NOT_FOUND)
+        .json({ error: "Nutritional Profile not found!" });
+    }
+
+    // Helper function to find an entry by date for calorie and nutrient history
+    const findEntryByDate = (entries: any[], date: Date, defaultEntry: any) => {
+      const entry = entries.find(
+        (entry) =>
+          entry.date.toISOString().split("T")[0] ===
+          date.toISOString().split("T")[0]
+      );
+      return entry || defaultEntry;
+    };
+
+    // Default entries for missing data
+    const defaultCalorieEntry = {
+      date: start,
+      caloriesConsumed: 0,
+      caloriesBurned: 0,
+    };
+
+    const defaultNutrientEntry = {
+      date: start,
+      cholesterol: 0,
+      protein: 0,
+      carbs: 0,
+      sodium: 0,
+      fats: 0,
+    };
+
+    // Find entries for the start date
+    const calorieStartEntry = findEntryByDate(
+      profile.calorieHistory,
+      start,
+      defaultCalorieEntry
+    );
+    const nutrientStartEntry = findEntryByDate(
+      profile.nutrientHistory,
+      start,
+      defaultNutrientEntry
+    );
+    const waterIntakeStartEntry = profile.waterIntakeHistory.find(
+      (entry) =>
+        entry.date.toISOString().split("T")[0] ===
+        start.toISOString().split("T")[0]
+    ) || { date: start, waterIntake: 0 };
+
+    // Find entries for the end date
+    const calorieEndEntry = findEntryByDate(
+      profile.calorieHistory,
+      end,
+      defaultCalorieEntry
+    );
+    const nutrientEndEntry = findEntryByDate(
+      profile.nutrientHistory,
+      end,
+      defaultNutrientEntry
+    );
+    const waterIntakeEndEntry = profile.waterIntakeHistory.find(
+      (entry) =>
+        entry.date.toISOString().split("T")[0] ===
+        end.toISOString().split("T")[0]
+    ) || { date: end, waterIntake: 0 };
+
+    // Construct the response object
+    const responseData = {
+      startDate: {
+        calorieHistory: calorieStartEntry,
+        nutrientHistory: nutrientStartEntry,
+        waterIntakeHistory: waterIntakeStartEntry,
+      },
+      endDate: {
+        calorieHistory: calorieEndEntry,
+        nutrientHistory: nutrientEndEntry,
+        waterIntakeHistory: waterIntakeEndEntry,
+      },
+    };
+
+    // Send the response
+    response.status(ResponseCode.SUCCESS).json(responseData);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      error: "Internal Server Error",
     });
   }
 };

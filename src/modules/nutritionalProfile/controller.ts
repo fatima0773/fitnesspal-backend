@@ -8,8 +8,10 @@ import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
 import {
   createNutritionalProfileService,
   getDailyCalorieConsumedService,
+  getDailyNutrientHistoryService,
   getDailyWaterIntakeService,
   getNutritionalProfileService,
+  getNutritionalProfilesForDatesService,
   getWeeklyCalorieConsumedService,
   getWeeklyWaterIntakeService,
   updateBloodProfileService,
@@ -201,6 +203,44 @@ export const getDailyWaterIntake = async (
 ) => {
   try {
     return await getDailyWaterIntakeService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get daily nutrient history
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getDailyNutrientHistory = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await getDailyNutrientHistoryService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get daily nutrient history
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getNutritionalProfilesForDates = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await getNutritionalProfilesForDatesService(request, response);
   } catch (error) {
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: ProfileResponseMessage.ERROR,

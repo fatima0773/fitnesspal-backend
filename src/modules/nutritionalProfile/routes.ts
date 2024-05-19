@@ -5,8 +5,10 @@ import express from "express";
 import {
   createNutritionalProfile,
   getDailyCalorieConsumed,
+  getDailyNutrientHistory,
   getDailyWaterIntake,
   getNutritionalProfile,
+  getNutritionalProfilesForDates,
   getWeeklyCalorieConsumed,
   getWeeklyWaterIntake,
   updateBloodProfile,
@@ -46,6 +48,16 @@ nutritionalProfileRoutes.get(
 nutritionalProfileRoutes.get(
   "/get-daily-water-intake/:userId",
   getDailyWaterIntake
+);
+
+nutritionalProfileRoutes.get(
+  "/get-daily-nutrient-history/:userId",
+  getDailyNutrientHistory
+);
+
+nutritionalProfileRoutes.get(
+  "/get-day-history/:userId/:startDate/:endDate",
+  getNutritionalProfilesForDates
 );
 
 export default nutritionalProfileRoutes;
