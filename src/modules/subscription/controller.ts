@@ -8,6 +8,8 @@ import {
   createSubscriptionDetailService,
   getCardService,
   getSubscriptionDetailService,
+  updateCardStatusService,
+  updateSubscriptionStatusService,
 } from "./services";
 
 // Services Imports
@@ -81,3 +83,42 @@ export const addCard = async (request: Request, response: Response) => {
     });
   }
 };
+
+/**
+ * Update Subscription Status
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const updateSubscriptionStatus = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await updateSubscriptionStatusService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Update Card Status
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const updateCardStatus = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await updateCardStatusService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+

@@ -10,6 +10,7 @@ export interface ISubscriptionDetails extends Document {
 
 // Create interfact for user credit card
 export interface ICardDetails extends Document {
+  name: string;
   cardNumber: string;
   cvv: string;
   expirationDate: Date;
@@ -18,6 +19,10 @@ export interface ICardDetails extends Document {
 
 // Create schema for user checkout information
 const cardDetailSchema: Schema<ICardDetails> = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   cardNumber: {
     type: String,
     required: true,
