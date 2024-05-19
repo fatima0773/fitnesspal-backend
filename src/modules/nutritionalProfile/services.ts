@@ -172,41 +172,33 @@ export const updateWaterIntakeHistoryService = async (
   response: Response
 ) => {
   try {
-    const { userId, date, waterIntake } = request.body;
-
-    // Validate the date
-    const intakeDate = new Date(date);
-    if (isNaN(intakeDate.getTime())) {
-      return response.status(400).json({ message: "Invalid date format." });
-    }
-    intakeDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
-
+    const { userId, waterIntake } = request.body;
     // Find the user's nutritional profile
     const profile = await NutritionalProfileModel.findOne({ userId: userId });
-
     if (!profile) {
       return response
         .status(404)
         .json({ message: "Nutritional profile not found for this user." });
     }
 
-    // Check if a water intake history entry already exists for the specified date
-    const intakeEntryIndex = profile.waterIntakeHistory.findIndex(
-      (entry) => entry.date.getTime() === intakeDate.getTime()
-    );
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
 
+    const intakeEntryIndex = profile.waterIntakeHistory.findIndex(
+      (entry) => entry.date.getTime() === todayDate.getTime()
+    );
     if (intakeEntryIndex !== -1) {
-      // If entry exists, update water intake value
-      const intakeEntry = profile.waterIntakeHistory[intakeEntryIndex];
-      intakeEntry.waterIntake = waterIntake || intakeEntry.waterIntake;
+      // If entry exists, update consumed and burned calories
+      profile.waterIntakeHistory[intakeEntryIndex].waterIntake +=
+        waterIntake || 0;
     } else {
       // If entry doesn't exist, create a new entry
-      const newIntakeEntry: IWaterIntakeHistory = {
-        date: intakeDate,
+      const newWaterIntakeHistory: IWaterIntakeHistory = {
+        date: todayDate,
         waterIntake: waterIntake || 0,
       } as unknown as IWaterIntakeHistory;
 
-      profile.waterIntakeHistory.push(newIntakeEntry);
+      profile.waterIntakeHistory.push(newWaterIntakeHistory);
     }
 
     // Save the updated profile
@@ -285,8 +277,7 @@ export const updateNutrientHistoryService = async (
   response: Response
 ) => {
   try {
-    const { userId, date, cholesterol, protein, carbs, sodium, fats } =
-      request.body;
+    const { userId, cholesterol, protein, carbs, sodium, fats } = request.body;
 
     // Validate the date
     const todayDate = new Date();
@@ -332,7 +323,202 @@ export const updateNutrientHistoryService = async (
     const updatedProfile = await profile.save();
     response.status(200).json(updatedProfile);
   } catch (error) {
-    console.log(error);
     response.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+/**
+ * Get Calorie Consumed of Today
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getDailyCalorieConsumedService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    // Find today's calorie entry
+    const todayCalorieEntry = profile.calorieHistory.find(
+      (entry) => entry.date.getTime() === todayDate.getTime()
+    );
+
+    if (!todayCalorieEntry) {
+      return response.status(ResponseCode.SUCCESS).json({
+        message: ProfileResponseMessage.NO_DATA,
+        data: { caloriesConsumed: 0 },
+      });
+    }
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: { caloriesConsumed: todayCalorieEntry.caloriesConsumed },
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get Calorie Consumed of Last Week (Last 7 Days)
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getWeeklyCalorieConsumedService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date and the date 7 days ago
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
+
+    // Filter the calorie history for the last 7 days
+    const lastWeekCalorieEntries = profile.calorieHistory.filter(
+      (entry) => entry.date >= lastWeek && entry.date <= today
+    );
+
+    const totalCaloriesConsumed = lastWeekCalorieEntries.reduce(
+      (total, entry) => total + entry.caloriesConsumed,
+      0
+    );
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: { totalCaloriesConsumed },
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get Water Intake of Last Week (Last 7 Days)
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getWeeklyWaterIntakeService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date and the date 7 days ago
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
+
+    // Filter the water intake history for the last 7 days
+    const lastWeekWaterIntake = profile.waterIntakeHistory.filter(
+      (entry) => entry.date >= lastWeek && entry.date <= today
+    );
+
+    const totalWaterIntake = lastWeekWaterIntake.reduce(
+      (total, entry) => total + entry.waterIntake,
+      0
+    );
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: { totalWaterIntake },
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+
+/**
+ * Get Water Intake of Today
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const getDailyWaterIntakeService = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    const userId = request.params.userId;
+
+    // Find the user's nutritional profile based on userId
+    const profile = await NutritionalProfileModel.findOne({ userId });
+
+    if (!profile) {
+      return response.status(ResponseCode.NOT_FOUND).json({
+        message: ProfileResponseMessage.PROFILE_NOT_FOUND,
+      });
+    }
+
+    // Get today's date
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+
+    // Find today's calorie entry
+    const todayWaterIntake = profile.waterIntakeHistory.find(
+      (entry) => entry.date.getTime() === todayDate.getTime()
+    );
+
+    if (!todayWaterIntake) {
+      return response.status(ResponseCode.SUCCESS).json({
+        message: ProfileResponseMessage.NO_DATA,
+        data: { waterIntake: 0 },
+      });
+    }
+
+    return response.status(ResponseCode.SUCCESS).json({
+      message: ProfileResponseMessage.DATA_FOUND,
+      data: { waterIntake: todayWaterIntake.waterIntake },
+    });
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
   }
 };

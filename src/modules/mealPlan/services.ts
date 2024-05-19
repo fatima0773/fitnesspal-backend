@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
+import { ResponseCode } from "../../common/apiResponse";
 import getPlan from "../../utils/mealPlan";
 import mongoose from "mongoose";
 
@@ -50,7 +50,6 @@ export const generateMealPlanService = async (
       });
     }
   } catch (error) {
-    console.error("Error generating meal plan:", error);
     response.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -83,7 +82,6 @@ export const getMealPlanService = async (
       });
     }
   } catch (error) {
-    console.error("Error retrieving meal plan:", error);
     response
       .status(ResponseCode.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal Server Error" });
@@ -123,7 +121,6 @@ export const completeMealService = async (
       });
     }
   } catch (error) {
-    console.error("Error updating meal plan tracker:", error);
     response.status(500).json({ message: "Internal Server Error" });
   }
 };
