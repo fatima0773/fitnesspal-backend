@@ -6,20 +6,16 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 // Create interface for step tracker
 export interface IStepHistory extends Document {
   userId: string;
+  stepGoal: number;
   stepHistory: [IUserStepHistory];
 }
 
 export interface IUserStepHistory extends Document {
-  stepGoal: number;
   currentSteps: number;
   date: Date;
 }
 
 const userHistorySchema: Schema<IUserStepHistory> = new mongoose.Schema({
-  stepGoal: {
-    type: Number,
-    required: true,
-  },
   currentSteps: {
     type: Number,
     required: true,
@@ -36,6 +32,10 @@ const stepHistorySchema: Schema<IStepHistory> = new mongoose.Schema({
     type: String,
     required: true,
     ref: "User",
+  },
+  stepGoal: {
+    type: Number,
+    required: true,
   },
   stepHistory: [userHistorySchema],
 });

@@ -5,7 +5,15 @@ import { Request, Response } from "express";
 import { ProfileResponseMessage, ResponseCode } from "../../common/apiResponse";
 
 // Services Imports
-import { createStepHistoryService, getAllStepHistoriesService, getStepHistoryService, updateStepsService } from "./services";
+import {
+  createStepHistoryService,
+  getAllStepHistoriesService,
+  getStepHistoryForDateService,
+  getStepHistoryForDatesService,
+  getStepHistoryForTodayService,
+  updateStepGoalService,
+  updateStepsService
+} from "./services";
 
 /**
  * Get All Step Histories
@@ -26,17 +34,53 @@ export const getAllStepHistories = async (
   }
 };
 /**
- * Get Step History
+ * Get Step History By Date
  * @param { Request } request
  * @param { Response } response
  * @returns { Response } response
  */
-export const getStepHistory = async (
+export const getStepHistoryForDate = async (
   request: Request,
   response: Response
 ) => {
   try {
-    return await getStepHistoryService(request, response);
+    return await getStepHistoryForDateService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+/**
+ * Get Step History By Today
+ * @param { Request } request
+ * @param { Response } response
+ * @returns { Response } response
+ */
+export const getStepHistoryForToday = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await getStepHistoryForTodayService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+/**
+ * Get Step History By Dates
+ * @param { Request } request
+ * @param { Response } response
+ * @returns { Response } response
+ */
+export const getStepHistoryForDates = async (
+  request: Request,
+  response: Response
+) => {
+  try {
+    return await getStepHistoryForDatesService(request, response);
   } catch (error) {
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: ProfileResponseMessage.ERROR,
@@ -72,6 +116,21 @@ export const createStepHistory = async (
 export const updateSteps = async (request: Request, response: Response) => {
   try {
     return await updateStepsService(request, response);
+  } catch (error) {
+    return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
+      message: ProfileResponseMessage.ERROR,
+    });
+  }
+};
+/**
+ * Update Step Goal
+ * @param { Request } request
+ * @param { Response }response
+ * @returns { Response } response
+ */
+export const updateStepGoal = async (request: Request, response: Response) => {
+  try {
+    return await updateStepGoalService(request, response);
   } catch (error) {
     return response.status(ResponseCode.INTERNAL_SERVER_ERROR).json({
       message: ProfileResponseMessage.ERROR,

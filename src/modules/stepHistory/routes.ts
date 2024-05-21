@@ -5,12 +5,11 @@ import express from "express";
 import {
   createStepHistory,
   getAllStepHistories,
-  // createStepHistory
-  getStepHistory,
+  getStepHistoryForDate,
+  getStepHistoryForDates,
+  getStepHistoryForToday,
+  updateStepGoal,
   updateSteps,
-  // getStepHistoryByDate,
-  // getStepHistoryByDateRange,
-  // updateSteps,
 } from "./controller";
 
 // eslint-disable-next-line new-cap
@@ -18,10 +17,12 @@ const stepHistoryRoutes = express.Router();
 
 // Health Profile Routes
 stepHistoryRoutes.get("/get-steps/:userId", getAllStepHistories);
-stepHistoryRoutes.get("/get-steps/:userId/:date", getStepHistory);
-stepHistoryRoutes.get("/get-steps/:userId/:startdate/:enddate", getStepHistory);
+stepHistoryRoutes.get("/get-steps/:userId/:date", getStepHistoryForDate);
+stepHistoryRoutes.get("get-today-steps/:userId", getStepHistoryForToday);
+stepHistoryRoutes.get("/get-steps/:userId/:startdate/:enddate", getStepHistoryForDates);
 stepHistoryRoutes.post("/create-step-history", createStepHistory);
 stepHistoryRoutes.put("/update-steps", updateSteps);
+stepHistoryRoutes.put("/update-step-goal", updateStepGoal);
 
 export default stepHistoryRoutes;
 
