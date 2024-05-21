@@ -69,14 +69,11 @@ export const getStepHistoryForDateService = async (
         .json({ error: "Date is required!" });
     }
 
+    const parsedDate = new Date(date);
+
     // Get User Step History by Date
     const stepHistory = await StepHistoryModel.findOne({
       userId: userId,
-      stepHistory: {
-        $elemMatch: {
-          date: Date.parse(date),
-        },
-      },
     });
 
     if (!stepHistory) {
@@ -85,7 +82,27 @@ export const getStepHistoryForDateService = async (
         .json({ error: "Step History not found!" });
     }
 
-    response.status(ResponseCode.SUCCESS).json(stepHistory);
+    // Helper function to find an entry by date for calorie and nutrient history
+    const findEntryByDate = (entries: IUserStepHistory[], date: Date) => {
+      const entry = entries.find(
+        (entry) =>
+          entry.date.toISOString().split("T")[0] ===
+          date.toISOString().split("T")[0]
+      );
+      return entry || null;
+    };
+
+    const entry = findEntryByDate(
+      stepHistory.stepHistory,
+      parsedDate,
+    );
+    if (!entry) {
+      return response
+        .status(ResponseCode.NOT_FOUND)
+        .json({ error: "Step History not found for the given date!" });
+    }
+
+    response.status(ResponseCode.SUCCESS).json(entry);
   } catch (error) {
     response
       .status(ResponseCode.INTERNAL_SERVER_ERROR)
@@ -113,27 +130,39 @@ export const getStepHistoryForTodayService = async (
         .json({ error: "User Id is required!" });
     }
 
-    // Get today's date
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0 for comparison
+    // Get today's date with time set to midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Get User Step History by Today's Date
-    const stepHistory = await StepHistoryModel.findOne({
-      userId: userId,
-      stepHistory: {
-        $elemMatch: {
-          date: Date.parse(todayDate.toDateString()),
-        },
-      },
-    });
+    // Get the user's step history
+    const userStepHistory = await StepHistoryModel.findOne({ userId: userId });
 
-    if (!stepHistory) {
+    // Check if the user step history exists
+    if (!userStepHistory || !userStepHistory.stepHistory.length) {
       return response
         .status(ResponseCode.NOT_FOUND)
         .json({ error: "Step History not found!" });
     }
 
-    response.status(ResponseCode.SUCCESS).json(stepHistory);
+    // Sort the stepHistory array by date in descending order and get the latest entry
+    const latestStepHistory = userStepHistory.stepHistory
+      .sort((a, b) => +new Date(b.date) - +new Date(a.date))[0];
+
+    // Compare the latest entry date with today's date
+    const latestEntryDate = new Date(latestStepHistory.date);
+    latestEntryDate.setHours(0, 0, 0, 0);
+
+    if (latestEntryDate.getTime() === today.getTime()) {
+      // Return the latest step history entry if the dates match
+      return response.status(ResponseCode.SUCCESS).json({
+        userId: userId,
+        stepHistory: latestStepHistory,
+      });
+    } else {
+      return response
+        .status(ResponseCode.NOT_FOUND)
+        .json({ error: "Step History for today's date not found!" });
+    }
   } catch (error) {
     response
       .status(ResponseCode.INTERNAL_SERVER_ERROR)
@@ -229,14 +258,14 @@ export const createStepHistoryService = async (
   response: Response
 ) => {
   try {
-    const { userId, stepGoal, currentSteps } = request.body;
+    const { userId, currentSteps } = request.body;
 
     // Check if required fields are provided
-    if (!userId || !stepGoal || !currentSteps) {
+    if (!userId || !currentSteps) {
       return response
         .status(ResponseCode.BAD_REQUEST)
         .json({
-          error: "User Id, Step Goal and Current Steps are required!",
+          error: "User Id and Current Steps are required!",
         });
     }
 
@@ -253,6 +282,7 @@ export const createStepHistoryService = async (
     // create new Step History
     const newStepHistory = await StepHistoryModel.create({
       userId: userId,
+      stepGoal: 10000,
       stepHistory: []
     });
 
@@ -312,7 +342,8 @@ export const updateStepsService = async (
     todayDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0 for comparison
 
     const todayStepHistoryIndex = existingRecord.stepHistory.findIndex((entry) => {
-      return entry.date.getTime() === todayDate.getTime();
+      return entry.date.toISOString().split("T")[0] ===
+        todayDate.toISOString().split("T")[0];
     });
 
     // Update current steps for today
