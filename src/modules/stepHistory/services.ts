@@ -156,6 +156,7 @@ export const getStepHistoryForTodayService = async (
       // Return the latest step history entry if the dates match
       return response.status(ResponseCode.SUCCESS).json({
         userId: userId,
+        stepGoal: userStepHistory.stepGoal,
         stepHistory: latestStepHistory,
       });
     } else {
